@@ -184,6 +184,7 @@ class GASDailyBillSensor(GASBaseSensor):
     @property
     def native_value(self):
         try:
-            return self.coordinator.data[self._user_code]["daily_bills"][self._index].get("regQty")
+            value = self.coordinator.data[self._user_code]["daily_bills"][self._index].get("regQty")
+            return value if value is not None and value != "" else STATE_UNKNOWN
         except (KeyError, IndexError):
             return STATE_UNKNOWN
