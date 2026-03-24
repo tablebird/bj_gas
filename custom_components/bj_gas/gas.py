@@ -5,11 +5,15 @@ import asyncio
 
 _LOGGER = logging.getLogger(__name__)
 
-WEEK_QRY_URL = "https://zt.bjgas.com/bjgas-server/i/api/intelligent/getWeekQry?userCode="
-STEP_QRY_URL = "https://zt.bjgas.com/bjgas-server/r/api?sysName=CCB&apiName=CM-MOB-IF07"
-YEAR_QRY_URL = "https://zt.bjgas.com/bjgas-server/i/api/intelligent/getYearQry?userCode="
-USER_INFO_URL = "https://zt.bjgas.com/bjgas-server/i/api/intelligent/queryUserInfo?userCode="
+DOMAIN = "https://zt.bjgas.com"
 
+R_API_PATH = "/bjgas-server/r/api"
+I_API_PATH = "/bjgas-server/i/api"
+
+WEEK_QRY_URL = f"{DOMAIN}{I_API_PATH}/intelligent/getWeekQry?userCode="
+STEP_QRY_URL = f"{DOMAIN}{R_API_PATH}?sysName=CCB&apiName=CM-MOB-IF07"
+YEAR_QRY_URL = f"{DOMAIN}{I_API_PATH}/intelligent/getYearQry?userCode="
+USER_INFO_URL = f"{DOMAIN}{I_API_PATH}/intelligent/queryUserInfo?userCode="
 
 class AuthFailed(Exception):
     pass
