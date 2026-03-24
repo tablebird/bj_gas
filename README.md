@@ -7,7 +7,7 @@
 
 
 # 特性
-- 支持北京燃气智能物联网燃气表（简称 NB 表，见下图）的用气信息采集，目前仅支持单户号
+- 支持北京燃气智能物联网燃气表（简称 NB 表，见下图）的用气信息采集，自动查询户号
 - 数据为定时更新，更新间隔为 10 分钟
 - 支持阶梯用气
 
@@ -33,7 +33,6 @@
 ```yaml
 bj_gas:
   token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX # 此为 APP 中抓取的 token
-  user_code: XXXXXXXXXXX                      # 此为燃气户号
 ```
 
 重新启动 Home Assistant

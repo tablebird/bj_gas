@@ -10,6 +10,10 @@ DOMAIN = "https://zt.bjgas.com"
 R_API_PATH = "/bjgas-server/r/api"
 I_API_PATH = "/bjgas-server/i/api"
 
+# 获取用户ID
+USER_ID_URL = f"{DOMAIN}{I_API_PATH}/getUserId/"
+# 获取用户燃气信息列表
+USER_GAS_LIST_URL = f"{DOMAIN}{I_API_PATH}/nsgetUserGasListEncrypt/"
 WEEK_QRY_URL = f"{DOMAIN}{I_API_PATH}/intelligent/getWeekQry?userCode="
 STEP_QRY_URL = f"{DOMAIN}{R_API_PATH}?sysName=CCB&apiName=CM-MOB-IF07"
 YEAR_QRY_URL = f"{DOMAIN}{I_API_PATH}/intelligent/getYearQry?userCode="
@@ -24,10 +28,11 @@ class InvalidData(Exception):
 
 
 class GASData:
-    def __init__(self, session, token, user_code):
+    def __init__(self, session, token):
         self._session = session
         self._token = token
-        self._user_code = user_code
+        self._user_id = ""
+        self._user_code_list = []
         self._info = {}
 
     def common_headers(self):
@@ -44,6 +49,30 @@ class GASData:
             "Authorization": f"Bearer {self._token}"
         }
         return headers
+    
+    async def async_get_user_id(self):
+        headers = self.common_headers()
+        r = await self._session.get(USER_ID_URL + self._token, headers=headers, timeout=10)
+        if r.status == 200:
+            result = json.loads(await r.read())
+            if result["success"]:
+                self._user_id = result["rows"][0]["userId"]
+            else:
+                raise AuthFailed(f"async_get_user_id error: {result}")
+
+    async def async_get_gas_List(self):
+        headers = self.common_headers()
+        r = await self._session.get(USER_GAS_LIST_URL + self._user_id, headers=headers, timeout=10)
+        if r.status == 200:
+            result = json.loads(await r.read())
+            if result["success"]:
+                self._user_code_list = []
+                for user_gas in result["rows"]:
+                    user_code = user_gas["userCode"]
+                    self._user_code_list.append(user_code)
+                return result["rows"]
+            else:
+                raise AuthFailed(f"async_get_gas_List error: {result}")
 
     async def async_get_week(self, user_code):
         headers = self.common_headers()
@@ -109,13 +138,18 @@ class GASData:
             raise InvalidData(f"async_get_step response status_code = {r.status}")
 
     async def async_get_data(self):
-        self._info = {self._user_code: {}}
-        await asyncio.gather(
-            self.async_get_userinfo(self._user_code),
-            self.async_get_week(self._user_code),
-            self.async_get_year(self._user_code),
-            self.async_get_step(self._user_code),
-            return_exceptions=True
-        )
+        self._info = {}
+        await self.async_get_user_id()
+        await self.async_get_gas_List()
+        for user_code in self._user_code_list:
+            self._info[user_code] = {}
+            await asyncio.gather(
+                self.async_get_userinfo(user_code),
+                self.async_get_week(user_code),
+                self.async_get_year(user_code),
+                self.async_get_step(user_code),
+                return_exceptions=True
+            )
+            
         _LOGGER.debug(f"Data {self._info}")
         return self._info

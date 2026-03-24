@@ -19,8 +19,7 @@ UPDATE_INTERVAL = timedelta(minutes=10)
 async def async_setup(hass: HomeAssistant, hass_config):
     config = hass_config[DOMAIN]
     token = config.get("token")
-    user_code = str(config.get("user_code"))
-    coordinator = BJRQCorrdinator(hass, token, user_code)
+    coordinator = BJRQCorrdinator(hass, token)
     hass.data[DOMAIN] = coordinator
 
     async def async_load_entities(now):
@@ -44,7 +43,7 @@ async def async_setup(hass: HomeAssistant, hass_config):
 
 
 class BJRQCorrdinator(DataUpdateCoordinator):
-    def __init__(self, hass, token, user_code):
+    def __init__(self, hass, token):
         super().__init__(
             hass,
             _LOGGER,
@@ -53,7 +52,7 @@ class BJRQCorrdinator(DataUpdateCoordinator):
         )
         self._hass = hass
         session = async_create_clientsession(hass)
-        self._gas = GASData(session, token, user_code)
+        self._gas = GASData(session, token)
 
     async def _async_update_data(self):
         try:
@@ -64,5 +63,5 @@ class BJRQCorrdinator(DataUpdateCoordinator):
                 return data
         except asyncio.TimeoutError:
             raise UpdateFailed("Data update timed out")
-        except Exception:
-            raise UpdateFailed("Failed to data update with unknown reason")
+        except Exception as e:
+            raise UpdateFailed(f"Failed to data update with unknown reason: {e}")
