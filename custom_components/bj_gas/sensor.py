@@ -103,6 +103,10 @@ class GASSensor(GASBaseSensor):
         
         self._attr_unique_id = f"{DOMAIN}.{user_code}_{sensor_key}"
         self.entity_id = self._attr_unique_id
+        
+    @property
+    def native_unit_of_measurement(self):
+        return self._attr_unit_of_measurement
 
     @property
     def native_value(self):
@@ -127,9 +131,12 @@ class GASHistorySensor(GASBaseSensor):
         self._user_code = user_code
         self._index = index
         self._attr_device_class = SensorDeviceClass.GAS
-        self._attr_unit_of_measurement = UnitOfVolume.CUBIC_METERS
         self._attr_unique_id = f"{DOMAIN}.{user_code}_monthly_{index + 1}"
         self.entity_id = self._attr_unique_id
+        
+    @property
+    def native_unit_of_measurement(self):
+        return UnitOfVolume.CUBIC_METERS
 
     @property
     def name(self):
@@ -160,9 +167,12 @@ class GASDailyBillSensor(GASBaseSensor):
         self._user_code = user_code
         self._index = index
         self._attr_device_class = SensorDeviceClass.GAS
-        self._attr_unit_of_measurement = UnitOfVolume.CUBIC_METERS
         self._attr_unique_id = f"{DOMAIN}.{user_code}_daily_{index + 1}"
         self.entity_id = self._attr_unique_id
+
+    @property
+    def native_unit_of_measurement(self):
+        return UnitOfVolume.CUBIC_METERS
 
     @property
     def name(self):
