@@ -1,3 +1,5 @@
+**重要说明：** 原作者好像是@zhaoyibo，但是原作者仓库已经不存在。猜测本项目的fork仓库应该是原项目fork出来的，fork的仓库也没有开启Issues，所以本仓库的修改不会发起合并
+
 # 北京燃气信息查询
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
@@ -26,6 +28,7 @@
 # 安装
 使用 HACS 以自定义存储库方式安装，或者从 [Latest release](https://github.com/tablebird/bj_gas/releases/latest) 下载最新的 Release 版本，将其中的 `custom_components/bj_gas` 放到你 Home Assistant 的 `custom_components/bj_gas` 中。
 
+[![Download repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository?owner=tablebird&repository=bj_gas&category=Integration)
 
 # 配置
 在 `configuration.yaml` 中，增加配置如下：
