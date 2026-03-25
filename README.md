@@ -1,7 +1,7 @@
 # 北京燃气信息查询
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![Stable](https://img.shields.io/github/v/release/zhaoyibo/bj_gas)](https://github.com/zhaoyibo/bj_gas/releases/latest)
+[![Stable](https://img.shields.io/github/v/release/tablebird/bj_gas)](https://github.com/tablebird/bj_gas/releases/latest)
 
 通过“北京燃气” APP 的接口，采集你的家庭用气信息。
 
@@ -24,7 +24,7 @@
 
 
 # 安装
-使用 HACS 以自定义存储库方式安装，或者从 [Latest release](https://github.com/zhaoyibo/bj_gas/releases/latest) 下载最新的 Release 版本，将其中的 `custom_components/bj_gas` 放到你 Home Assistant 的 `custom_components/bj_gas` 中。
+使用 HACS 以自定义存储库方式安装，或者从 [Latest release](https://github.com/tablebird/bj_gas/releases/latest) 下载最新的 Release 版本，将其中的 `custom_components/bj_gas` 放到你 Home Assistant 的 `custom_components/bj_gas` 中。
 
 
 # 配置
