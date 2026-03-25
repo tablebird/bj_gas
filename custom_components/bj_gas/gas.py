@@ -58,7 +58,9 @@ class GASData:
             if result["success"]:
                 self._user_id = result["rows"][0]["userId"]
             else:
-                raise AuthFailed(f"async_get_user_id error: {result}")
+                raise InvalidData(f"async_get_user_id error: {result}")
+        else:
+            raise InvalidData(f"async_get_user_id response status_code = {r.status}")
 
     async def async_get_gas_List(self):
         headers = self.common_headers()
@@ -72,7 +74,10 @@ class GASData:
                     self._user_code_list.append(user_code)
                 return result["rows"]
             else:
-                raise AuthFailed(f"async_get_gas_List error: {result}")
+                raise InvalidData(f"async_get_gas_List error: {result}")
+        else:
+            raise InvalidData(f"async_get_gas_List response status_code = {r.status}")
+            
 
     async def async_get_week(self, user_code):
         headers = self.common_headers()
