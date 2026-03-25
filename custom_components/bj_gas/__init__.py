@@ -8,6 +8,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers import discovery
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.storage import Store
 from .gas import GASData, AuthFailed, InvalidData
 from .const import DOMAIN
 
@@ -15,11 +16,12 @@ _LOGGER = logging.getLogger(__name__)
 
 UPDATE_INTERVAL = timedelta(minutes=10)
 
+STORAGE_KEY = "bj_gas.data"
+STORAGE_VERSION = 1
 
 async def async_setup(hass: HomeAssistant, hass_config):
-    config = hass_config[DOMAIN]
-    token = config.get("token")
-    coordinator = BJRQCorrdinator(hass, token)
+    config = hass_config[DOMAIN]    
+    coordinator = BJRQCorrdinator(hass, config)
     hass.data[DOMAIN] = coordinator
 
     async def async_load_entities(now):
@@ -43,7 +45,7 @@ async def async_setup(hass: HomeAssistant, hass_config):
 
 
 class BJRQCorrdinator(DataUpdateCoordinator):
-    def __init__(self, hass, token):
+    def __init__(self, hass, config):
         super().__init__(
             hass,
             _LOGGER,
@@ -52,7 +54,8 @@ class BJRQCorrdinator(DataUpdateCoordinator):
         )
         self._hass = hass
         session = async_create_clientsession(hass)
-        self._gas = GASData(session, token)
+        store = Store(hass, STORAGE_VERSION, STORAGE_KEY)
+        self._gas = GASData(session, config, store)
 
     async def _async_update_data(self):
         try:

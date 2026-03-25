@@ -17,10 +17,10 @@
 # 使用之前
 下载“北京燃气” APP，注册登录并绑定户号，然后点击“用气分析”，应该就可以看到该户号的用气信息。
 
-使用任何网络抓包软件，如安卓手机的 Fiddler， 苹果手机的 Stream，进行抓包，可以只关注 zt.bjgas.com 域名下的请求。
-抓包时在“北京燃气” APP 上进行操作，查看一下用气分析。看到 HTTP HEADER 中有内容为 “Authorization: Bearer XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX” 的内容，**将 “Authorization: Bearer ” 后的内容复制下来，这个字符串就是 token**，保存备用。
+使用任何网络抓包软件，如安卓手机的 Fiddler， 苹果手机的 Stream，进行抓包
+抓包时先退出“北京燃气”APP登录状态，进入登录页面->密码登录，输入手机号/密码点击登录，返回抓包软件找到`https://zt.bjgas.com/bjgas-server/oauth/token?client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx`的请求，**将 “/bjgas-server/oauth/token?” 后的内容复制下来，这些参数就是认证的参数**，保存备用。
 
-![http_sniff](https://user-images.githubusercontent.com/11988080/199236229-b1307db7-8823-46e5-a1e5-5b5e9ecb1a13.jpg)
+![http_sniff](./.github/images/oauth_token.png)
 
 
 # 安装
@@ -32,7 +32,7 @@
 
 ```yaml
 bj_gas:
-  token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX # 此为 APP 中抓取的 token
+  oauth_params: client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx # 此为认证的参数
 ```
 
 重新启动 Home Assistant

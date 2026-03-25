@@ -10,6 +10,8 @@ DOMAIN = "https://zt.bjgas.com"
 R_API_PATH = "/bjgas-server/r/api"
 I_API_PATH = "/bjgas-server/i/api"
 
+# 登录
+OAUTH_URL = f"{DOMAIN}/bjgas-server/oauth/token?"
 # 获取用户ID
 USER_ID_URL = f"{DOMAIN}{I_API_PATH}/getUserId/"
 # 获取用户燃气信息列表
@@ -28,14 +30,17 @@ class InvalidData(Exception):
 
 
 class GASData:
-    def __init__(self, session, token):
+    def __init__(self, session, config, store):
         self._session = session
-        self._token = token
+        self._token = ""
+        self._config = config
+        self._store = store
         self._user_id = ""
+        self._oauth_count = 0
         self._user_code_list = []
         self._info = {}
 
-    def common_headers(self):
+    def common_headers(self, authorization: bool=True):
         headers = {
             "Host": "zt.bjgas.com",
             "Accept": "application/json, text/plain, */*",
@@ -45,10 +50,56 @@ class GASData:
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 "
                           "(KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.7(0x1800072c) "
                           "NetType/WIFI Language/zh_CN",
-            "Connection": "keep-alive",
-            "Authorization": f"Bearer {self._token}"
+            "Connection": "keep-alive"
         }
+        if authorization:
+            if self._token == "":
+                raise AuthFailed("No token, please check your configuration and restart Home Assistant")
+            headers["Authorization"] = f"Bearer {self._token}"
         return headers
+    
+    async def async_load_token(self):
+        data = await self._store.async_load()
+        if data and "access_token" in data:
+            self._token = data["access_token"]
+            return True
+        else:
+            return False
+        
+    async def async_save_token(self):
+        await self._store.async_save({
+            "access_token": self._token,
+            "saved_at": datetime.datetime.now().isoformat()
+        })
+
+    async def async_oauth_token(self):
+        headers = self.common_headers(authorization=False)
+        oauth_params = self._config.get("oauth_params")
+        r = await self._session.post(OAUTH_URL + oauth_params, headers=headers, timeout=10)
+        if r.status == 200:
+            result = json.loads(await r.read())
+            if "access_token" in result:
+                self._token = result["access_token"]
+                await self.async_save_token()
+            else:
+                raise AuthFailed(f"oauth error: {result}")
+        else:
+            data = await r.read()
+            raise AuthFailed(f"oauth response status_code = {r.status}, params = {oauth_params}, response = {data}")
+        
+    async def async_init_token(self):
+        if self._token == "":
+            load = await self.async_load_token()
+            if not load:
+                await self.async_oauth_token()
+        
+    async def is_invalid_token(self, res):
+        if res.status == 401:
+            result = json.loads(await res.read())
+            if "error" in result and result["error"] == "invalid_token":
+                _LOGGER.warning(f"Token is invalid, need to refresh token: {result['error_description']}")
+                return True
+        return False
     
     async def async_get_user_id(self):
         headers = self.common_headers()
@@ -60,6 +111,14 @@ class GASData:
             else:
                 raise InvalidData(f"async_get_user_id error: {result}")
         else:
+            # 刷新token 未知情况失败超过3次，抛出异常
+            if self._oauth_count < 3 and self.is_invalid_token(r):
+                self._oauth_count += 1
+                await self.async_oauth_token()
+                await self.async_get_user_id()
+                # 获取成功重置计数器
+                self._oauth_count = 0
+                return
             raise InvalidData(f"async_get_user_id response status_code = {r.status}")
 
     async def async_get_gas_List(self):
@@ -144,6 +203,7 @@ class GASData:
 
     async def async_get_data(self):
         self._info = {}
+        await self.async_init_token()
         await self.async_get_user_id()
         await self.async_get_gas_List()
         for user_code in self._user_code_list:
