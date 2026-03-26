@@ -1,0 +1,23 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "北京燃气",
+                "description": "查询\"北京燃气\"App绑定的燃气信息",
+                "data": {
+                    "oauth_params": "认证参数"
+                },
+                "data_placeholder": {
+                    "oauth_params": "client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx"
+                }
+            }
+        },
+        "error": {
+            "oauth_params_invalid": "认证参数无效",
+            "unknown": "未知错误"
+        },
+        "abort": {
+            "oauth_params_repeat": "认证参数已添加，请勿重复添加"
+        }
+    }
+}

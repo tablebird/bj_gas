@@ -36,6 +36,7 @@ class GASData:
         self._config = config
         self._store = store
         self._user_id = ""
+        self.mobile = ""
         self._oauth_count = 0
         self._user_code_list = []
         self._info = {}
@@ -67,10 +68,12 @@ class GASData:
             return False
         
     async def async_save_token(self):
-        await self._store.async_save({
-            "access_token": self._token,
-            "saved_at": datetime.datetime.now().isoformat()
-        })
+        data = await self._store.async_load()
+        if data is None:
+            data = {}
+        data["access_token"] = self._token
+        data["saved_at"] = datetime.datetime.now().isoformat()
+        await self._store.async_save(data)
 
     async def async_oauth_token(self):
         headers = self.common_headers(authorization=False)
@@ -101,25 +104,42 @@ class GASData:
                 return True
         return False
     
+    async def async_load_user_id(self):
+        data = await self._store.async_load()
+        if data and "user_id" in data:
+            self._user_id = data["user_id"]
+            return True
+        else:
+            return False
+
+    async def async_save_user_id(self):
+        data = await self._store.async_load()
+        if data is None:
+            data = {}
+        data["user_id"] = self._user_id
+        data["mobile"] = self.mobile
+        await self._store.async_save(data)
+    
     async def async_get_user_id(self):
         headers = self.common_headers()
         r = await self._session.get(USER_ID_URL + self._token, headers=headers, timeout=10)
         if r.status == 200:
             result = json.loads(await r.read())
             if result["success"]:
-                self._user_id = result["rows"][0]["userId"]
+                data = result["rows"][0]
+                self._user_id = data["userId"]
+                self.mobile = data["mobile"]
+                await self.async_save_user_id()
             else:
                 raise InvalidData(f"async_get_user_id error: {result}")
         else:
-            # 刷新token 未知情况失败超过3次，抛出异常
-            if self._oauth_count < 3 and self.is_invalid_token(r):
-                self._oauth_count += 1
-                await self.async_oauth_token()
-                await self.async_get_user_id()
-                # 获取成功重置计数器
-                self._oauth_count = 0
-                return
             raise InvalidData(f"async_get_user_id response status_code = {r.status}")
+
+    async def async_init_user_id(self):
+        if self._user_id == "":
+            load = await self.async_load_user_id()
+            if not load:
+                await self.async_get_user_id()
 
     async def async_get_gas_List(self):
         headers = self.common_headers()
@@ -135,6 +155,14 @@ class GASData:
             else:
                 raise InvalidData(f"async_get_gas_List error: {result}")
         else:
+            # 刷新token 未知情况失败超过3次，抛出异常
+            if self._oauth_count < 3 and self.is_invalid_token(r):
+                self._oauth_count += 1
+                await self.async_oauth_token()
+                await self.async_get_gas_List()
+                # 获取成功重置计数器
+                self._oauth_count = 0
+                return
             raise InvalidData(f"async_get_gas_List response status_code = {r.status}")
             
 
@@ -204,7 +232,7 @@ class GASData:
     async def async_get_data(self):
         self._info = {}
         await self.async_init_token()
-        await self.async_get_user_id()
+        await self.async_init_user_id()
         await self.async_get_gas_List()
         for user_code in self._user_code_list:
             self._info[user_code] = {}

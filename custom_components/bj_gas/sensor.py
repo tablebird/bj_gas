@@ -9,7 +9,13 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     STATE_UNKNOWN
 )
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.config_entries import ConfigEntry
+
+from .coord import BJRQCorrdinator
 from .const import DOMAIN
+
 GAS_SENSORS = {
     "balance": {
         "name": "燃气费余额",
@@ -56,6 +62,29 @@ GAS_SENSORS = {
         "icon": "hass:valve"
     }
 }
+
+async def async_setup_entry(hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback):
+    sensors = []
+    coordinator = BJRQCorrdinator(hass, config_entry.data)
+    await coordinator.async_refresh()
+    for user_code, data in coordinator.data.items():
+        # 基础实时传感器
+        for key in GAS_SENSORS.keys():
+            if key in data.keys():
+                sensors.append(GASSensor(coordinator, user_code, key))
+        
+        # 历史月度账单
+        if "monthly_bills" in data:
+            for month in range(len(data["monthly_bills"])):
+                sensors.append(GASHistorySensor(coordinator, user_code, month))
+        
+        # 每日用量记录
+        if "daily_bills" in data:
+            for day in range(len(data["daily_bills"])):
+                sensors.append(GASDailyBillSensor(coordinator, user_code, day))
+    async_add_entities(sensors, True)
 
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     sensors = []
