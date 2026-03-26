@@ -32,7 +32,7 @@
 
 # 配置
 
-进入 -> 设置 -> 设备与服务 -> 添加集成 -> 搜索"北京燃气信息查询 -> 输入 **认证参数** (`client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx`) -> 提交
+进入 -> 设置 -> 设备与服务 -> 添加集成 -> 搜索"北京燃气信息查询" -> 输入 **认证参数** (`client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx`) -> 提交
 
 [![Config flow](./.github/images/config_flow.png)]
 
