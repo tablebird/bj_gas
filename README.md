@@ -31,15 +31,10 @@
 [![Download repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository?owner=tablebird&repository=bj_gas&category=Integration)
 
 # 配置
-在 `configuration.yaml` 中，增加配置如下：
 
-```yaml
-bj_gas:
-  oauth_params: client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx # 此为认证的参数
-```
+进入 -> 设置 -> 设备与服务 -> 添加集成 -> 搜索"北京燃气信息查询 -> 输入 **认证参数** (`client_id=xxxxxxx&client_secret=xxxxxxx&grant_type=password&username=xxxxxxx&password=xxxxxxx`) -> 提交
 
-重新启动 Home Assistant
-
+[![Config flow](./.github/images/config_flow.png)]
 
 ## 传感器
 包含的传感器
