@@ -86,28 +86,6 @@ async def async_setup_entry(hass: HomeAssistant,
                 sensors.append(GASDailyBillSensor(coordinator, user_code, day))
     async_add_entities(sensors, True)
 
-async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    sensors = []
-    coordinator = hass.data[DOMAIN]
-    
-    for user_code, data in coordinator.data.items():
-        # 基础实时传感器
-        for key in GAS_SENSORS.keys():
-            if key in data.keys():
-                sensors.append(GASSensor(coordinator, user_code, key))
-        
-        # 历史月度账单
-        if "monthly_bills" in data:
-            for month in range(len(data["monthly_bills"])):
-                sensors.append(GASHistorySensor(coordinator, user_code, month))
-        
-        # 每日用量记录
-        if "daily_bills" in data:
-            for day in range(len(data["daily_bills"])):
-                sensors.append(GASDailyBillSensor(coordinator, user_code, day))
-                
-    async_add_devices(sensors, True)
-
 class GASBaseSensor(CoordinatorEntity, SensorEntity):
     """基础传感器类"""
     def __init__(self, coordinator):
