@@ -7,6 +7,7 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.storage import Store
 from homeassistant.config_entries import ConfigEntry
@@ -55,6 +56,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
         return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA, errors=errors)
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> config_entries.OptionsFlow:
+        return OptionsFlow(config_entry)
+
 class OptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: ConfigEntry) -> None:
@@ -78,4 +84,4 @@ class OptionsFlow(config_entries.OptionsFlow):
             except Exception:
                 _LOGGER.exception("Unexpected error")
                 errors["base"] = "unknown"
-        return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA, errors=errors)
+        return self.async_show_form(step_id="init", data_schema=DATA_SCHEMA, errors=errors)
