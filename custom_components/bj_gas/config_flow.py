@@ -64,7 +64,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class OptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        self.config_entry = config_entry
+        pass
         
     async def async_step_init(self, user_input: dict[str, Any] | None = None):
         errors: dict[str, str] = {}
@@ -78,7 +78,11 @@ class OptionsFlow(config_entries.OptionsFlow):
                     if user_input["oauth_params"] == oauth_params:
                         return self.async_abort(reason="oauth_params_repeat")
                 info = await validate_input(self.hass, user_input)
-                return self.async_create_entry(title=info["title"], data=user_input)
+
+                new_data = {**self.config_entry.data, **user_input}
+                self.hass.config_entries.async_update_entry(self.config_entry, title=info["title"], data=new_data)
+
+                return self.async_create_entry(title=info["title"], data={})
             except AuthFailed:
                 errors["base"] = "oauth_params_invalid"
             except Exception:
