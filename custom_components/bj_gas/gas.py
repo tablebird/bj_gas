@@ -156,7 +156,7 @@ class GASData:
                 raise InvalidData(f"async_get_gas_List error: {result}")
         else:
             # 刷新token 未知情况失败超过3次，抛出异常
-            if self._oauth_count < 3 and self.is_invalid_token(r):
+            if self._oauth_count < 3 and await self.is_invalid_token(r):
                 self._oauth_count += 1
                 await self.async_oauth_token()
                 await self.async_get_gas_List()
