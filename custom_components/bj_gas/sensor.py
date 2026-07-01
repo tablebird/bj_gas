@@ -14,7 +14,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry
 
 from .coord import BJRQCorrdinator
-from .const import DOMAIN
 
 GAS_SENSORS = {
     "balance": {
@@ -108,7 +107,7 @@ class GASSensor(GASBaseSensor):
         self._attr_state_class = config.get("state_class")
         self._attributes_to_track = config.get("attributes", [])
         
-        self._attr_unique_id = f"{DOMAIN}.{user_code}_{sensor_key}"
+        self._attr_unique_id = f"sensor.{user_code}_{sensor_key}"
         self.entity_id = self._attr_unique_id
         
     @property
@@ -138,7 +137,7 @@ class GASHistorySensor(GASBaseSensor):
         self._user_code = user_code
         self._index = index
         self._attr_device_class = SensorDeviceClass.GAS
-        self._attr_unique_id = f"{DOMAIN}.{user_code}_monthly_{index + 1}"
+        self._attr_unique_id = f"sensor.{user_code}_monthly_{index + 1}"
         self.entity_id = self._attr_unique_id
         
     @property
@@ -174,7 +173,7 @@ class GASDailyBillSensor(GASBaseSensor):
         self._user_code = user_code
         self._index = index
         self._attr_device_class = SensorDeviceClass.GAS
-        self._attr_unique_id = f"{DOMAIN}.{user_code}_daily_{index + 1}"
+        self._attr_unique_id = f"sensor.{user_code}_daily_{index + 1}"
         self.entity_id = self._attr_unique_id
 
     @property
