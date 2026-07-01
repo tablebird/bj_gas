@@ -117,9 +117,13 @@ class GASSensor(GASBaseSensor):
     @property
     def native_value(self):
         try:
-            return self.coordinator.data[self._user_code].get(self._sensor_key)
+            value = self.coordinator.data[self._user_code].get(self._sensor_key)
+            # 对于有 device_class 的数值传感器，返回 None 而不是字符串
+            if self._attr_device_class and value == STATE_UNKNOWN:
+                return None
+            return value
         except (KeyError, TypeError):
-            return STATE_UNKNOWN
+            return None
 
     @property
     def extra_state_attributes(self):
@@ -149,14 +153,18 @@ class GASHistorySensor(GASBaseSensor):
         try:
             return self.coordinator.data[self._user_code]['monthly_bills'][self._index].get('mon')
         except (KeyError, IndexError):
-            return STATE_UNKNOWN
+            return f"Month {self._index + 1}"
 
     @property
     def native_value(self):
         try:
-            return self.coordinator.data[self._user_code]["monthly_bills"][self._index].get("regQty")
+            value = self.coordinator.data[self._user_code]["monthly_bills"][self._index].get("regQty")
+            # 对于数值传感器，返回 None 而不是字符串 'unknown'
+            if value is None or value == STATE_UNKNOWN:
+                return None
+            return value
         except (KeyError, IndexError):
-            return STATE_UNKNOWN
+            return None
 
     @property
     def extra_state_attributes(self):
@@ -185,12 +193,15 @@ class GASDailyBillSensor(GASBaseSensor):
         try:
             return self.coordinator.data[self._user_code]["daily_bills"][self._index].get("day")[:10]
         except (KeyError, IndexError):
-            return STATE_UNKNOWN
+            return f"Day {self._index + 1}"
 
     @property
     def native_value(self):
         try:
             value = self.coordinator.data[self._user_code]["daily_bills"][self._index].get("regQty")
-            return value if value is not None and value != "" else STATE_UNKNOWN
+            # 对于数值传感器，返回 None 而不是字符串 'unknown'
+            if value is None or value == "" or value == STATE_UNKNOWN:
+                return None
+            return value
         except (KeyError, IndexError):
-            return STATE_UNKNOWN
+            return None
