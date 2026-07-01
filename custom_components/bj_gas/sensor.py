@@ -35,7 +35,6 @@ GAS_SENSORS = {
     },
     "current_level_remain": {
         "name": "当前阶梯剩余额度",
-        "device_class": SensorDeviceClass.GAS,
         "unit_of_measurement": UnitOfVolume.CUBIC_METERS,
         "state_class": SensorStateClass.MEASUREMENT
     },
